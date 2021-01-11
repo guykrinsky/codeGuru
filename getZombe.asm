@@ -4,10 +4,10 @@ RANDOM_PLACE equ 1234
 %macro getZombe 1
 mov ax, [%1]
 cmp ax, 0cccch
-jnz get_vars
+jnz get_vars%1
 mov ax, [8000h + %1]
 
-get_vars:
+get_vars%1:
 xchg ah, al ; al = var1
 pop bx
 add bx, table
@@ -26,7 +26,8 @@ mov word[bx+2] , 04d2h
 %endmacro
 
 ;Take zomA code
-push ax
+mov cx, 8
+rep push ax
 add ax, zombe_code
 mov [RANDOM_PLACE], ax
 
@@ -36,6 +37,7 @@ loop delay
 
 ;; My code here
 getZombe 100h
+getZombe 200h
 jmpi:
 jmp jmpi
 
