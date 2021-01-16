@@ -1,18 +1,47 @@
-DELAY_TIME equ 55
 RANDOM_PLACE equ 1234
+DELAY_TIME equ 55
+mov dx, ax ;dx will point to the start of the program
 
-%macro getZombe 1
-;get zobmbe 
-mov ax, [%1]
-cmp ax, 0cccch
-jnz get_zombe_location%1
+
+mov dx, ax
+add ax, zombe_code
+mov [RANDOM_PLACE], ax
+mov cx, DELAY_TIME
+delay:
+loop delay
+
+
+%macro get_zombe_foot_print 1
 mov ax, [8000h + %1]
+stosw
+%endmacro
 
-get_zombe_location%1:
-; mov zombe location to ax
+get_zombe_foot_print 100h
+get_zombe_foot_print 200h
+get_zombe_foot_print 300h
+get_zombe_foot_print 400h
+get_zombe_foot_print 500h
+get_zombe_foot_print 600h
+get_zombe_foot_print 700h
+get_zombe_foot_print 800h
+
+mov cx, 8
+mov di, 0
+take_zombe:
+push cx
+push es
+pop ds
+push cs
+pop es
+
+mov ax, [di]
 xchg ah, al 
 mov bx, dx
 add bx, table
+push ds
+pop es
+push cs
+pop ds
 xlat
 mov cl, al 
 
@@ -26,25 +55,9 @@ add ax, 0x67
 mov bx, ax
 mov word[bx] , 26ffh
 mov word[bx+2] , 04d2h
-%endmacro
-
-mov dx, ax ;dx will point to the start of the program
-add ax, zombe_code
-mov [RANDOM_PLACE], ax
-
-mov cx, DELAY_TIME
-delay:
-loop delay
-
-;; My code here
-getZombe 100h
-getZombe 200h
-getZombe 300h
-getZombe 401h
-getZombe 501h
-
-jmpi:
-jmp jmpi
+add di, 2
+pop cx
+loop take_zombe
 
 zombe_code:
 push cs
