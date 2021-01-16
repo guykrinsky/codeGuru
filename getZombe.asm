@@ -2,32 +2,33 @@ DELAY_TIME equ 55
 RANDOM_PLACE equ 1234
 
 %macro getZombe 1
+;get zobmbe 
 mov ax, [%1]
 cmp ax, 0cccch
-jnz get_vars%1
+jnz get_zombe_location%1
 mov ax, [8000h + %1]
 
-get_vars%1:
-xchg ah, al ; al = var1
-pop bx
+get_zombe_location%1:
+; mov zombe location to ax
+xchg ah, al 
+mov bx, dx
 add bx, table
 xlat
-mov dl, al ;dl = al of zombe
+mov cl, al 
 
-xchg ah, al ;al = var2
+xchg ah, al 
 xlat 
-xor al, dl
-xchg al, ah
+xor al, cl
+xchg al, ah 
 
-add ax, 0x67
+; make the zombe jump to our code
+add ax, 0x67 
 mov bx, ax
 mov word[bx] , 26ffh
 mov word[bx+2] , 04d2h
 %endmacro
 
-;Take zomA code
-mov cx, 8
-rep push ax
+mov dx, ax ;dx will point to the start of the program
 add ax, zombe_code
 mov [RANDOM_PLACE], ax
 
@@ -38,16 +39,20 @@ loop delay
 ;; My code here
 getZombe 100h
 getZombe 200h
+getZombe 300h
+getZombe 401h
+getZombe 501h
+
 jmpi:
 jmp jmpi
 
 zombe_code:
 push cs
 pop ss
-xor di, di
+mov di, ax
+mov sp, di
 mov ax, 0ab53h
 mov bx, 0cccch
-mov sp, 0ffffh
 mov cx, di
 stosw
 jmp cx

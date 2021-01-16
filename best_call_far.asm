@@ -1,45 +1,51 @@
 DELAY_TIME equ 65
 RANDOM_PLACE equ 1234
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;Take zomA code
+;;;;;Take zombies code
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-real_start:
-push ax
-push ax
-add ax, zombe_code
-mov [RANDOM_PLACE], ax
+%macro getZombie 1
+;get zombi's footprints
+mov ax, [%1]
+cmp ax, 0cccch
+jnz get_zombie_location%1
+mov ax, [8000h + %1]
 
-mov cx, DELAY_TIME-(delay-real_start)
-delay:
-loop delay
-
-mov si, 100h
-mov bx, [si]
-cmp bx, 0cccch
-jnz get_vars
-mov si, 8100h
-
-get_vars:
-mov ax, [si]
-xchg ah, al ; al = var1
-pop bx
+get_zombie_location%1:
+; mov zombie location to ax
+xchg ah, al 
+mov bx, dx
 add bx, table
 xlat
-mov dl, al ;dl = al of zombe
+mov cl, al 
 
-xchg ah, al ;al = var2
+xchg ah, al 
 xlat 
-xor al, dl
-xchg al, ah
+xor al, cl
+xchg al, ah 
 
-add ax, 0x67
+; make the zombie jump to our code
+add ax, 0x67 
 mov bx, ax
 mov word[bx] , 26ffh
 mov word[bx+2] , 04d2h
+%endmacro
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+real_start:
+mov dx, ax ;dx will point to the start of the program
+add ax, zombie_code
+mov [RANDOM_PLACE], ax
+
+; Take zombies
+mov cx, DELAY_TIME
+delay:
+loop delay
+getZombie 100h
+getZombie 200h
+getZombie 301h
 
 ;; My code here
-pop ax
-mov dx, ax
+mov ax,dx
 add dx, end
 mov si, start
 add si, ax
@@ -53,11 +59,11 @@ pop ss
 add ax, start
 start:
 mov bx, ax
-add bx, 200h
+add bx, 300h
 mov word [bx], 10h
 
 mov cx, ax
-sub cx, 200h
+sub cx, 300h
 mov si, cx
 mov word[si], 10h
 
@@ -87,13 +93,14 @@ jnz paste_up
 jmp main
 
 paste_up:
+add di, 100h
 mov di, bx
-add di, 200h
 jmp paste_code
 
 paste_down:
+sub si, 200h
 mov di, si
-sub di, 200h
+
 
 paste_code:
 push di ;push the start of the code
@@ -117,13 +124,13 @@ jmp ax
 end:
 
 
-zombe_code:
+zombie_code:
 push cs
 pop ss
-xor di, di
+mov di, ax
 mov ax, 0ab53h
 mov bx, 0cccch
-mov sp, 0ffffh
+mov sp, di
 mov cx, di
 stosw
 jmp cx
