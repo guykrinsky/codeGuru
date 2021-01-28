@@ -4,7 +4,7 @@ add dx, end
 mov si, ax
 add si, start
 copy:
-mov cx, (end-start)
+mov cx, (end-start)/2
 rep movsw
 
 push cs
@@ -39,13 +39,12 @@ push cs
 pop ds
 cmp word[si], 10h ;check down
 jnz paste_down
-cmp word[bx], 10h ;check up
+cmp word[di], 10h ;check up
 jnz paste_up
 jmp main
 
 paste_up:
-add di, 100h
-mov di, bx
+add di, 200h
 jmp paste_code
 
 paste_down:
@@ -62,14 +61,14 @@ pop es
 
 xor si, si
 paste:
-mov cx, (end-start)
+mov cx, (end-start)/2
 rep movsw
 
 push ds
 pop es
 push cs
 pop ds
-mov di, (end-start)
+
 pop ax
 jmp ax
 end:
