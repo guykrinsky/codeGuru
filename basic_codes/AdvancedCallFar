@@ -1,0 +1,49 @@
+%define CODE_JUMPS 0x500
+%define CALLFAR_LENGTH 0x300
+
+
+push ss
+push ds
+push ss
+pop es
+push ds
+pop ss
+
+mov si, ax
+add si, @stack_code
+mov cx, (@end_stack_code - @stack_code + 1) / 2
+mov bx,  @stack_code
+add bx, ax
+rep movsw
+pop ds
+
+mov al, 0xA3
+mov sp, ax
+add sp, CALLFAR_LENGTH
+push es
+pop ds
+push cs
+pop es
+
+mov bx, di
+mov [bx], ax
+mov [bx + 2], cs
+lea si, [di - (@end_stack_code - @end_copy_code)]
+jmp @move_call_far
+
+;movsw
+@stack_code:
+rep movsw
+@move_call_far:
+sub word [bx], (CODE_JUMPS + CALLFAR_LENGTH)
+mov di, [bx]
+sub sp, CODE_JUMPS
+movsw
+mov cx, (@end_copy_code - @move_call_far + 1)/2
+dec di
+xor si, si
+nop
+dw 0x1FFF
+@end_copy_code:
+dw 0x1FFF
+@end_stack_code:
